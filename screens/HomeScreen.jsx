@@ -69,9 +69,9 @@ export default function HomeScreen ({navigation}) {
         <View style={styles.tweetContainer}>
             <TouchableOpacity onPress={ () => gotoProfileScreen()}>
                 <Image
-                source={{uri: 'https://cdn4.iconfinder.com/data/icons/logos-3/600/React.js_logo-1024.png'}}
-                style={{width: 42, height: 42, borderRadius: 25, marginRight: 8}}
-            />
+                    source={{uri: 'https://cdn4.iconfinder.com/data/icons/logos-3/600/React.js_logo-1024.png'}}
+                    style={{width: 42, height: 42, borderRadius: 25, marginRight: 8}}
+                />
             </TouchableOpacity>
             <View style={{flex: 1}}>
                 <TouchableOpacity style={ styles.flexRow } onPress={ () => gotoSingleTweetScreen()}>

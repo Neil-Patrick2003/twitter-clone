@@ -43,7 +43,7 @@ const HomeStackNavigator = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen 
-          name='New Tweet' 
+          name='New Tweet'  
           component={NewTweet} 
           options={{title: ''}}
         />
@@ -117,7 +117,7 @@ export default function app(){
     <NavigationContainer>
       <Drawer.Navigator initialRouteName='Home' 
        screenOptions={{
-        headerShown:false,
+        headerShown:true,
        }}
       >
         <Drawer.Screen name="Home" component={HomeStackNavigator} />

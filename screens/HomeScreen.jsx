@@ -95,7 +95,7 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity style={styles.tweetContentContainer} onPress={gotoSingleTweetScreen}>
           <Text numberOfLines={2} style={styles.tweetContent}>
-            {body}
+            { body }
           </Text>
         </TouchableOpacity>
         <View style={styles.tweetEngagement}>

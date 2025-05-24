@@ -18,6 +18,10 @@ import SearchScreen from './screens/SearchScreens';
 import NotificationsScreen from './screens/NotificationsScreen';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { enableScreens } from 'react-native-screens';
+
+
+enableScreens();
 
 
 

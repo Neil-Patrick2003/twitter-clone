@@ -13,30 +13,49 @@ import {
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import axios from "axios";
-import { formatDistanceToNowStrict } from "date-fns";
+import { formatDistanceToNowStrict, set } from "date-fns";
 
 export default function HomeScreen({ navigation }) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [ page, setPage ] = useState(1);
+  const [ isAtEndOfScrolling, setIsAtEndOfScrolling ] = useState(false);
 
-  const handleRefresh = () => {
+  function handleRefresh() {
+    setPage(1);
+    setIsAtEndOfScrolling(false);
     setRefreshing(true);
     getAllTweets();
   };
 
+  function handleReachEnd() {
+    setPage(page + 1);
+  }
+
   useEffect(() => {
     getAllTweets();
-  }, []);
+  }, [page]);
 
   function getAllTweets() {
-    console.log("Fetching tweets...");
+   
+
     axios
-      .get("http://10.0.2.2:8000/api/tweets")
+      .get(`http://10.0.2.2:8000/api/tweets?page=${page}` )
       .then((response) => {
-        // Filter out items that don't have a user
-        const filtered = response.data.filter((item) => item.user);
-        setData(filtered);
+        
+         console.log('Fetched Tweet IDs:', response.data.data.map(item => item.id));
+        if(page === 1){
+            setData(response.data.data);
+        }
+        else{
+            setData([...data, ...response.data.data]);
+        }
+
+        if(!response.data.next_page_url){
+            setIsAtEndOfScrolling(true);
+        }
+        
         setIsLoading(false);
         setRefreshing(false);
       })
@@ -120,12 +139,16 @@ export default function HomeScreen({ navigation }) {
               created_at={item.created_at}
             />
           )}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={item => item.id.toString()}
           ItemSeparatorComponent={() => <View style={styles.tweetSeparator}></View>}
           refreshing={refreshing}
           onRefresh={handleRefresh}
+          onEndReached={handleReachEnd}
+          onEndReachedThreshold={0}
+          ListFooterComponent={() => !isAtEndOfScrolling && (<ActivityIndicator size="large" color="gray" />)}
         />
       )}
+ 
 
       <TouchableOpacity style={styles.floatingButton} onPress={gotoNewTweetScreen}>
         <FontAwesome6 name="add" size={24} color="white" />

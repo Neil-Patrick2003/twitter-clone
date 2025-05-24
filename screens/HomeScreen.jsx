@@ -13,6 +13,7 @@ import {
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import axios from "axios";
+import axiosConfig from "../Helpers/axiosConfig"; // Assuming you have axiosConfig set up
 import { formatDistanceToNowStrict, set } from "date-fns";
 
 export default function HomeScreen({ navigation }) {
@@ -40,11 +41,10 @@ export default function HomeScreen({ navigation }) {
   function getAllTweets() {
    
 
-    axios
-      .get(`http://10.0.2.2:8000/api/tweets?page=${page}` )
+    axiosConfig
+      .get(`/tweets?page=${page}` )
       .then((response) => {
         
-         console.log('Fetched Tweet IDs:', response.data.data.map(item => item.id));
         if(page === 1){
             setData(response.data.data);
         }
@@ -60,7 +60,7 @@ export default function HomeScreen({ navigation }) {
         setRefreshing(false);
       })
       .catch((error) => {
-        console.log(error);
+        alert('Error', 'Failed to fetch tweets. Please try again later.');
         setIsLoading(false);
         setRefreshing(false);
       });
@@ -70,15 +70,18 @@ export default function HomeScreen({ navigation }) {
     navigation.navigate("Profile Screen");
   }
 
-  function gotoSingleTweetScreen() {
-    navigation.navigate("Tweet Screen");
+  function gotoSingleTweetScreen(tweetId) {
+    navigation.navigate('Tweet Screen', 
+        { 
+            tweetId : tweetId,
+        });
   }
 
   function gotoNewTweetScreen() {
     navigation.navigate("New Tweet");
   }
 
-  const Item = ({ name, username, body, avatar, created_at }) => (
+  const Item = ({ tweetId, name, username, body, avatar, created_at }) => (
     <View style={styles.tweetContainer}>
       <TouchableOpacity onPress={gotoProfileScreen}>
         <Image
@@ -87,13 +90,13 @@ export default function HomeScreen({ navigation }) {
         />
       </TouchableOpacity>
       <View style={{ flex: 1 }}>
-        <TouchableOpacity style={styles.flexRow} onPress={gotoSingleTweetScreen}>
+        <TouchableOpacity style={styles.flexRow} onPress={gotoProfileScreen}>
           <Text style={styles.tweetName}>{name}</Text>
           <Text style={styles.tweetHeader}>@{username}</Text>
           <Text style={styles.tweetHeader}>&middot;</Text>
           <Text style={styles.tweetHeader}>{formatDistanceToNowStrict(new Date(created_at))}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tweetContentContainer} onPress={gotoSingleTweetScreen}>
+        <TouchableOpacity style={styles.tweetContentContainer} onPress={() => gotoSingleTweetScreen(tweetId)}>
           <Text numberOfLines={2} style={styles.tweetContent}>
             { body }
           </Text>
@@ -132,6 +135,7 @@ export default function HomeScreen({ navigation }) {
           data={data}
           renderItem={({ item }) => (
             <Item
+              tweetId={item.id}
               name={item.user?.name || "Unknown"}
               username={item.user?.username || "anonymous"}
               avatar={item.user?.avatar || "https://via.placeholder.com/42"}

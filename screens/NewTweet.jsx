@@ -1,15 +1,34 @@
 
 import { useState } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
+import axiosConfig from "../Helpers/axiosConfig"; // Assuming you have axiosConfig set up
 
 export default function NewTweet ({navigation}) {
 
     const [tweet, setTweet] = useState("");
+    const [ isLoading, setIsLoading ] = useState(false);
 
     function submitTweet() {
-        
-        navigation.navigate('Tab');
+        if(tweet.length === 0) {
+            Alert.alert(
+                'Empty Tweet',
+                'Tweet cannot be empty. Please write something before submitting.',
+            );
+            return;
+        }
+        setIsLoading(true);
+        axiosConfig
+            .post('tweets', { body: tweet })
+            .then(response => {
+                navigation.navigate('Tab', {NewTweetAdded: response.data});
+                setIsLoading(false);
+            })
+            .catch(error => {
+                alert('Error', 'Failed to submit tweet. Please try again later.');
+                setIsLoading(false);
+            });
+
 
     }
 
@@ -17,9 +36,19 @@ export default function NewTweet ({navigation}) {
         <View style={ styles.container }>
             <View style={ styles.buttonContainer }>
                 <Text style={ tweet.length > 250 ? styles.textRed : styles.textGray}>Character left: {280 - tweet.length}</Text>
-                <TouchableOpacity style={ styles.tweetButton } onPress={ () => submitTweet()}>
-                    <Text style={ styles.buttonText }>Submit</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    { isLoading && 
+                        <ActivityIndicator size="small" color="gray"  /> 
+                    }
+                    <TouchableOpacity 
+                        style={ styles.tweetButton } 
+                        onPress={ () => submitTweet()}
+                        disabled={isLoading}
+                    >
+                        <Text style={ styles.buttonText }>Submit</Text>
+                    </TouchableOpacity>
+                </View>
+                
             </View>
             <View style={ styles.tweetBoxContainer }>
                 <Image

@@ -1,5 +1,5 @@
 import { NavigationContainer } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -16,18 +16,19 @@ import axios from "axios";
 import axiosConfig from "../Helpers/axiosConfig"; // Assuming you have axiosConfig set up
 import { formatDistanceToNowStrict, set } from "date-fns";
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ route, navigation }) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [ page, setPage ] = useState(1);
   const [ isAtEndOfScrolling, setIsAtEndOfScrolling ] = useState(false);
+  const flatListRef = useRef();
 
   function handleRefresh() {
-    setPage(1);
     setIsAtEndOfScrolling(false);
     setRefreshing(true);
-    getAllTweets();
+    setPage(1);
+
   };
 
   function handleReachEnd() {
@@ -37,6 +38,37 @@ export default function HomeScreen({ navigation }) {
   useEffect(() => {
     getAllTweets();
   }, [page]);
+
+  useEffect(() => {
+    if(route.params?.NewTweetAdded) {
+        getAllTweetsRefresh();
+        flatListRef.current?.scrollToOffset({
+        offset: 0,
+        animated: true,
+        });
+    }
+
+  }, [route.params?.NewTweetAdded]);    
+
+  function getAllTweetsRefresh() {
+   setPage(1);
+   setIsLoading(false);
+    setRefreshing(false);
+
+    axiosConfig
+      .get(`/tweets` )
+      .then((response) => {
+        setData(response.data.data);
+        setIsLoading(false);
+        setRefreshing(false);
+      })
+      .catch((error) => {
+        alert('Error', 'Failed to fetch tweets. Please try again later.');
+        setIsLoading(false);
+        setRefreshing(false);
+      });
+  }
+
 
   function getAllTweets() {
    
@@ -132,6 +164,7 @@ export default function HomeScreen({ navigation }) {
         <ActivityIndicator style={{ marginTop: 8 }} size="large" color="gray" />
       ) : (
         <FlatList
+          ref={flatListRef}
           data={data}
           renderItem={({ item }) => (
             <Item

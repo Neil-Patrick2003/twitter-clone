@@ -1,56 +1,78 @@
 import { Button } from "@react-navigation/elements";
 import { NavigationContainer } from "@react-navigation/native";
-import React from "react"
+import React, { use, useEffect, useState } from "react"
 import { FlatList, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import axios from "axios";
+import { formatDistanceToNowStrict } from "date-fns";
+
 
 
 
 export default function HomeScreen ({navigation}) {
 
-    const DATA = [
-        {
-            id: '1',
-            title: 'First Item',
-        },
-        {
-            id: '2',
-            title: 'Second Item',
-        },
-        {
-            id: '3',
-            title: 'Third Item',
-        },
-        {
-            id: '4',
-            title: 'fourth Item',
-        },
-        {
-            id: '5',
-            title: 'fifth Item',
-        },
-        {
-            id: '6',
-            title: 'sixth Item',
-        },
-        {
-            id: '7',
-            title: 'seventh Item',
-        },
-        {
-            id: '8',
-            title: 'eighth Item',
-        },
-        {
-            id: '9',
-            title: 'ninth Item',
-        },
-         {
-            id: '10',
-            title: 'tenth Item',
-        },
-    ];
+    const [ data, setData ] = useState([]);
+
+    useEffect(() => {
+        getallTweets();
+    }, [])
+
+    function getallTweets() {
+        console.log("Fetching tweets...");
+        axios
+        .get  ('http://10.0.2.2:8000/api/tweets')
+        
+        .then(response => {
+            setData(response.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
+
+    // const DATA = [
+    //     {
+    //         id: '1',
+    //         title: 'First Item',
+    //     },
+    //     {
+    //         id: '2',
+    //         title: 'Second Item',
+    //     },
+    //     {
+    //         id: '3',
+    //         title: 'Third Item',
+    //     },
+    //     {
+    //         id: '4',
+    //         title: 'fourth Item',
+    //     },
+    //     {
+    //         id: '5',
+    //         title: 'fifth Item',
+    //     },
+    //     {
+    //         id: '6',
+    //         title: 'sixth Item',
+    //     },
+    //     {
+    //         id: '7',
+    //         title: 'seventh Item',
+    //     },
+    //     {
+    //         id: '8',
+    //         title: 'eighth Item',
+    //     },
+    //     {
+    //         id: '9',
+    //         title: 'ninth Item',
+    //     },
+    //      {
+    //         id: '10',
+    //         title: 'tenth Item',
+    //     },
+    // ];
 
 
     function gotoProfileScreen() {
@@ -65,23 +87,23 @@ export default function HomeScreen ({navigation}) {
         navigation.navigate('New Tweet');
     }
 
-    const Item = ({title}) => (
+    const Item = ({ name , username , body , avatar , created_at}) => (
         <View style={styles.tweetContainer}>
             <TouchableOpacity onPress={ () => gotoProfileScreen()}>
                 <Image
-                    source={{uri: 'https://cdn4.iconfinder.com/data/icons/logos-3/600/React.js_logo-1024.png'}}
+                    source={{uri: avatar}}
                     style={{width: 42, height: 42, borderRadius: 25, marginRight: 8}}
                 />
             </TouchableOpacity>
             <View style={{flex: 1}}>
                 <TouchableOpacity style={ styles.flexRow } onPress={ () => gotoSingleTweetScreen()}>
-                    <Text style={ styles.tweetName }> { title } </Text>
-                    <Text style={ styles.tweetHeader }>Email</Text>
+                    <Text style={ styles.tweetName }> { name }</Text>
+                    <Text style={ styles.tweetHeader }>@{ username }</Text>
                     <Text style={ styles.tweetHeader }>&middot;</Text>
-                    <Text style={ styles.tweetHeader }>9m</Text>
+                    <Text style={ styles.tweetHeader }>{ formatDistanceToNowStrict(created_at) }</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.tweetContentContainer} onPress={ () => gotoSingleTweetScreen()}>
-                    <Text numberOfLines={2} style={styles.tweetContent}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</Text>
+                    <Text numberOfLines={2} style={styles.tweetContent}>{ body }</Text>
                 </TouchableOpacity>
                 <View style={ styles.tweetEngagement}>
                     <TouchableOpacity style={ styles.flexRow }>
@@ -109,10 +131,11 @@ export default function HomeScreen ({navigation}) {
     return(
         <View style={styles.container}>
             <FlatList
-                data={DATA}
-                renderItem={({item}) => <Item title={item.title} />}
+                data={data}
+                renderItem={({item}) => <Item name={item.user.name} username={ item.user.username } body={ item.body } avatar={ item.user.avatar } created_at={ item.created_at } />}
                 keyExtractor={item => item.id}
-                ItemSeparatorComponent={ () => <View style={styles.tweetSeparator}></View>}
+                ItemSeparatorComponent={ () => <View style={styles.tweetSeparator}></
+                View>}
             />
             <TouchableOpacity style={ styles.floatingButton} onPress={ () => gotoNewTweetScreen() }>
                 <FontAwesome6 name="add" size={24} color="white" />         
@@ -130,7 +153,7 @@ const styles = StyleSheet.create({
 
     tweetContainer: {
         flexDirection: 'row',
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         paddingVertical: 12 ,   
     },
     flexRow: {
